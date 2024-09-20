@@ -1,0 +1,103 @@
+1. Book search scenario
+Scenario: User searches for books on the home page.
+
+Feature: Book Search
+Scenario: User searches for "The Great Gatsby"
+Given User is on homepage
+When User types "The Great Gatsby" into search bar
+And clicks on search button
+Then Search results should include book titled "The Great Gatsby"
+
+2.Viewing book details scenario
+Scenario: User views the details of the book.
+
+Feature: View Book Details
+Scenario: User views "The Great Gatsby" details
+Given User searches for "The Great Gatsby"
+When User clicks on "The Great Gatsby" link in search results
+Then Display book details page for "The Great Gatsby"
+And Provide detailed information including book title, author, and description
+
+
+
+
+
+Test Steps
+
+using Gauge.CSharp.Lib;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+public class StepDefinitions
+{
+   private IWebDriver driver;
+   [Setup]
+   public void Setup()
+   {
+       driver = new ChromeDriver();
+       driver.Navigate().GoToUrl("https://kitaptest.com"); // Uygulamanın url'si
+   }
+   [Teardown]
+   public void Teardown()
+   {
+       driver.Quit();
+   }
+   [Given(@"Kullanıcı ana sayfada")]
+   public void GivenKullaniciAnaSayfada()
+   {
+       // Ana sayfanın yüklenmiş mi doğrula
+       Assert.IsTrue(driver.Title.Contains("Kitapçı"));
+   }
+   [When(@"Kullanıcı ""(.*)"" başlığını arama çubuğuna yazar")]
+   public void WhenKullaniciKitapArar(string bookTitle)
+   {
+       var searchBox = driver.FindElement(By.Id("searchBox")); // Arama çubuğu ID'si
+       searchBox.SendKeys(bookTitle);
+   }
+   [When(@"Arama düğmesine tıklar")]
+   public void WhenAramaDugmesineTiklar()
+   {
+       var searchButton = driver.FindElement(By.Id("searchButton")); // Arama düğmesi ID'si
+       searchButton.Click();
+   }
+   [Then(@"Arama sonuçları ""(.*)"" başlıklı kitabı içermelidir")]
+   public void ThenAramaSonuclariKitabiIceremelidir(string bookTitle)
+   {
+       var results = driver.FindElement(By.Id("searchResults")); // Sonuçların gösterileceği bölüm
+       Assert.IsTrue(results.Text.Contains(bookTitle));
+   }
+   [When(@"Kullanıcı arama sonuçlarındaki ""(.*)"" bağlantısına tıklar")]
+   public void WhenKullaniciSonucBağlantısinaTiklar(string bookTitle)
+   {
+       var bookLink = driver.FindElement(By.LinkText(bookTitle)); // Kitap bağlantısı
+       bookLink.Click();
+   }
+   [Then(@"""(.*)"" için kitap ayrıntıları sayfası görüntülenmeli")]
+   public void ThenKitapAyrintilariGoruntulenmeli(string bookTitle)
+   {
+       Assert.IsTrue(driver.Title.Contains(bookTitle)); // Kitap ayrıntıları sayfası başlığı
+   }
+   [Then(@"Kitap başlığı, yazar ve açıklama dahil olmak üzere ayrıntılı bilgiler olmalı")]
+   public void ThenAyrintiliBilgilerSunulmalidir()
+   {
+       var title = driver.FindElement(By.Id("bookTitle")).Text; // Kitap başlığı
+       var author = driver.FindElement(By.Id("bookAuthor")).Text; // Yazar
+       var description = driver.FindElement(By.Id("bookDescription")).Text; // Açıklama
+       Assert.IsFalse(string.IsNullOrEmpty(title));
+       Assert.IsFalse(string.IsNullOrEmpty(author));
+       Assert.IsFalse(string.IsNullOrEmpty(description));
+   }
+}
+
+
+
+
+
+Other Issues
+• Error Handling:
+Try-catch blocks can be used to catch errors that may occur during testing and error records can be kept.
+• Data Management:
+A test database can be used to manage test data. Data can be added before tests and cleaned after tests to make it faster.
+• Cross-Browser Testing:
+Test scenarios can be run in different browsers and results can be compared.
+• Scalability:
+Existing steps can be used and expanded to add new test scenarios.
