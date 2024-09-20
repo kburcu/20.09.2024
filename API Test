@@ -1,0 +1,109 @@
+Book search api response schema
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "properties": {
+   "books": {
+     "type": "array",
+     "items": {
+       "type": "object",
+       "properties": {
+         "id": { "type": "string" },
+         "title": { "type": "string" },
+         "author": { "type": "string" },
+         "description": { "type": "string" }
+       },
+       "required": ["id", "title", "author", "description"]
+     }
+   }
+ },
+ "required": ["books"]
+}
+
+
+
+get book details api response schema
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "properties": {
+   "id": { "type": "string" },
+   "title": { "type": "string" },
+   "author": { "type": "string" },
+   "description": { "type": "string" }
+ },
+ "required": ["id", "title", "author", "description"]
+}
+
+
+Implementing API contract tests
+Required Libraries
+• Newtonsoft.Json
+• Newtonsoft.Json.Schema
+• NUnit
+
+using Newtonsoft.Json.Schema;
+using Newtonsoft.Json.Linq;
+using NUnit.Framework;
+using System.Net.Http;
+using System.Threading.Tasks;
+public class ApiTests
+{
+   private readonly HttpClient client;
+   public ApiTests()
+   {
+       client = new HttpClient();
+   }
+   [Test]
+   public async Task TestKitapAramaApi()
+   {
+       // Arrange
+       var title = "Muhteşem Gatsby";
+       var url = $"https://kitapci.com/api/books?title={title}";
+       // Act
+       var response = await client.GetAsync(url);
+       response.EnsureSuccessStatusCode();
+       var responseBody = await response.Content.ReadAsStringAsync();
+       // Validate JSON schema
+       var schema = JSchema.Parse(System.IO.File.ReadAllText("search-books-schema.json"));
+       var json = JObject.Parse(responseBody);
+       var isValid = json.IsValid(schema);
+       // Assert
+       Assert.IsTrue(isValid, "API yanıtı JSON şemasına uygun değil.");
+   }
+   [Test]
+   public async Task TestKitapAyrintilariApi()
+   {
+       // Arrange
+       var bookId = "123"; // Örnek kitap ID'si
+       var url = $"https://kitapci.com/api/books/{bookId}";
+       // Act
+       var response = await client.GetAsync(url);
+       response.EnsureSuccessStatusCode();
+       var responseBody = await response.Content.ReadAsStringAsync();
+       // Validate JSON schema
+       var schema = JSchema.Parse(System.IO.File.ReadAllText("book-details-schema.json"));
+       var json = JObject.Parse(responseBody);
+       var isValid = json.IsValid(schema);
+       // Assert
+       Assert.IsTrue(isValid, "API yanıtı JSON şemasına uygun değil.");
+   }
+}
+
+Run API Tests
+Setup Steps
+1 Create Project
+2 Install Dependencies
+
+Install-Package Newtonsoft.Json
+Install-Package Newtonsoft.Json.Schema
+Install-Package NUnit
+Install-Package NUnit3TestAdapter
+
+3 Writing Tests:
+Add the above test codes to our project and place the JSON schema files in the project directory.
+
+
+Running tests
+To run the tester from the command line, type the following:
+dotnet test
